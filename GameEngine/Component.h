@@ -7,5 +7,4 @@ class Component
 public:
 	uuid _uuid;
 	GameObject* gameObject;
-	
 };
