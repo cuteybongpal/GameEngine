@@ -51,6 +51,18 @@
     <ClInclude Include="imgui\backends\imgui_impl_win32.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="EditorCore.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameObject.cpp">
@@ -84,6 +96,18 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorCore.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
