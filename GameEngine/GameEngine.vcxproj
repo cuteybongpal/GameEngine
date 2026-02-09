@@ -127,9 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Action.h" />
     <ClInclude Include="Asset.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="EditorCore.h" />
+    <ClInclude Include="EditorUI.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="EngineCore.h" />
     <ClInclude Include="GameObject.h" />
@@ -141,10 +143,14 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="MenuBar.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Stat.h" />
     <ClInclude Include="System.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Action.cpp" />
     <ClCompile Include="Asset.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="EditorCore.cpp" />
@@ -157,9 +163,14 @@
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="MenuBar.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Stat.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GameEngine.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
