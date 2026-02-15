@@ -6,7 +6,10 @@
 class EngineCore
 {
 public:
-	std::vector<Asset> assets;
 	EditorCore editorCore;
+	void AddAsset(char* path);
+	Asset* getAsset(char* key);
+private:
+	std::vector<Asset> assets;
 };
 

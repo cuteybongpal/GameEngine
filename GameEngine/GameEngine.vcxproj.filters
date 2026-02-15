@@ -16,6 +16,9 @@
     <Filter Include="소스 파일\EditorUI">
       <UniqueIdentifier>{dc1e4166-bee7-4b8d-bb1a-d8cae9dfff4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\EditorUI">
+      <UniqueIdentifier>{ba3914cd-7003-4f1b-b711-eb8f6eee5018}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameObject.h">
@@ -75,11 +78,23 @@
     <ClInclude Include="resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="EditorUI.h">
+      <Filter>헤더 파일\EditorUI</Filter>
+    </ClInclude>
     <ClInclude Include="MenuBar.h">
+      <Filter>헤더 파일\EditorUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Hierarchy.h">
+      <Filter>헤더 파일\EditorUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewport.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="EditorUI.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="Inspector.h">
+      <Filter>헤더 파일\EditorUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>헤더 파일\EditorUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -135,6 +150,18 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="MenuBar.cpp">
+      <Filter>소스 파일\EditorUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Hierarchy.cpp">
+      <Filter>소스 파일\EditorUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewport.cpp">
+      <Filter>소스 파일\EditorUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector.cpp">
+      <Filter>소스 파일\EditorUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.cpp">
       <Filter>소스 파일\EditorUI</Filter>
     </ClCompile>
   </ItemGroup>

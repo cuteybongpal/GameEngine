@@ -1,8 +1,4 @@
-#include "imgui.h"
-#include "imgui_impl_dx11.h"
-#include "imgui_impl_win32.h"
-#include <d3d11.h>
-#include <tchar.h>
+#include "engine.h"
 #include "EditorUI.h"
 
 // 라이브러리 링크: DirectX 11 사용을 위해 필요한 라이브러리들을 링커에 전달
@@ -17,9 +13,11 @@ static IDXGISwapChain* g_pSwapChain = nullptr;         // 그려진 그림을 화면으로
 static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr; // 최종적으로 그려질 '도화지' 객체
 
 //EditorUI
-MenuBar* menuBar = nullptr;
-
-
+MenuBar* editor_menuBar = nullptr;
+Hierarchy* editor_hierarchy = nullptr; 
+Viewport* editor_viewport = nullptr;
+Inspector* editor_inspector = nullptr;
+Console* editor_console = nullptr;
 // [2] 함수 전방 선언
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -41,7 +39,8 @@ void CleanupDeviceD3D() {
     if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
 }
 
-int main(int, char**)
+//argv에는 해당 엔진이 사용할 위치의 path가 사용될 거임
+int main(int argc, char** argv)
 {
     // --- (1) Win32 윈도우 생성 단계 ---
     // 윈도우 클래스 설정: OS에 내가 만들 창의 '종류'를 등록
@@ -98,6 +97,11 @@ int main(int, char**)
     // Win32 및 DX11 백엔드와 ImGui 연결
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+    //Editor UI 생성 단계
+    editor_menuBar = new MenuBar();
+    editor_hierarchy = new Hierarchy();
+    editor_viewport = new Viewport();
+    editor_inspector = new Inspector();
 
     // --- (4) 메인 렌더링 루프 ---
     bool done = false;
@@ -143,35 +147,20 @@ int main(int, char**)
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
         // 여기서 메뉴바 작업 가능
-
+        editor_menuBar->Draw();
         ImGui::End(); // MyDockSpace 종료
+
         // 좌측: 계층 구조 (Hierarchy)
-        ImGui::Begin("Hierarchy");
-        ImGui::Text("Main Scene");
-        if (ImGui::TreeNode("Player")) {
-            ImGui::BulletText("Camera");
-            ImGui::BulletText("Mesh");
-            ImGui::TreePop();
-        }
-        ImGui::End();
+        editor_hierarchy->Draw();
 
         // 중앙: 게임 뷰포트 (실제 게임 화면이 나올 곳)
-        ImGui::Begin("Viewport");
-        ImGui::Text("Real-time Rendering View");
-        // 나중에 여기에 DX11 텍스처를 꽂을 겁니다.
-        ImGui::End();
+        editor_viewport->Draw();
 
         // 우측: 속성창 (Inspector)
-        ImGui::Begin("Inspector");
-        ImGui::Text("Object Settings");
-        static float color[3] = { 1, 0, 0 };
-        ImGui::ColorEdit3("Ambient Color", color);
-        ImGui::End();
+        editor_inspector->Draw();
 
         // 하단: 콘텐츠 브라우저 / 로그
-        ImGui::Begin("Console");
-        ImGui::Text("Log: Engine Initialized...");
-        ImGui::End();
+        editor_console->Draw();
         // [C] 렌더링 단계
         ImGui::Render(); // ImGui가 설계된 UI를 렌더링 데이터(정점 등)로 변환
 
