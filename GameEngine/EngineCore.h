@@ -6,7 +6,7 @@
 class EngineCore
 {
 public:
-	EditorCore editorCore;
+	EditorCore* editorCore;
 	void AddAsset(char* path);
 	Asset* getAsset(char* key);
 private:

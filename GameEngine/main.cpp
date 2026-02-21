@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "EditorUI.h"
+#include "EngineCore.h"
 
 // 라이브러리 링크: DirectX 11 사용을 위해 필요한 라이브러리들을 링커에 전달
 #pragma comment(lib, "d3d11.lib")
@@ -18,6 +19,11 @@ Hierarchy* editor_hierarchy = nullptr;
 Viewport* editor_viewport = nullptr;
 Inspector* editor_inspector = nullptr;
 Console* editor_console = nullptr;
+
+//EngineCore
+EngineCore* engineCore = nullptr;
+EditorCore** editorCore = nullptr;
+
 // [2] 함수 전방 선언
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -42,13 +48,12 @@ void CleanupDeviceD3D() {
 //argv에는 해당 엔진이 사용할 위치의 path가 사용될 거임
 int main(int argc, char** argv)
 {
-    // --- (1) Win32 윈도우 생성 단계 ---
-    // 윈도우 클래스 설정: OS에 내가 만들 창의 '종류'를 등록
+    // 윈도우 클래스 설정: OS에 내가 만들 창의 종류 등록
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGuiEngine"), NULL };
     RegisterClassEx(&wc);
 
-    // 실제 윈도우 생성 (제목, 스타일, 좌표, 크기 설정)
-    HWND hwnd = CreateWindow(wc.lpszClassName, _T("Gemini Game Engine UI"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    // 실제 윈도우 생성 (제목, 스타일,1 좌표, 크기 설정)
+    HWND hwnd = CreateWindow(wc.lpszClassName, _T("Game Engine UI"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
     // --- (2) DirectX 11 초기화 단계 ---
     // Swap Chain 상세 설정: 더블 버퍼링, 포맷, 출력 창 연결 등
@@ -102,7 +107,11 @@ int main(int argc, char** argv)
     editor_hierarchy = new Hierarchy();
     editor_viewport = new Viewport();
     editor_inspector = new Inspector();
-
+    //EngineCore 생성
+    engineCore = new EngineCore();
+    engineCore->editorCore = new EditorCore();
+    editorCore = &engineCore->editorCore;
+    (*editorCore)->camera = new EditorCamera(*g_pd3dDevice, *g_pd3dDeviceContext, *g_pSwapChain);
     // --- (4) 메인 렌더링 루프 ---
     bool done = false;
     while (!done)
@@ -152,9 +161,10 @@ int main(int argc, char** argv)
 
         // 좌측: 계층 구조 (Hierarchy)
         editor_hierarchy->Draw();
-
+        //뷰포트 화면 그리기
+        (*editorCore)->camera->Draw(*g_pd3dDeviceContext, *g_pSwapChain);
         // 중앙: 게임 뷰포트 (실제 게임 화면이 나올 곳)
-        editor_viewport->Draw();
+        editor_viewport->Draw(*(*editorCore)->camera->srv);
 
         // 우측: 속성창 (Inspector)
         editor_inspector->Draw();
