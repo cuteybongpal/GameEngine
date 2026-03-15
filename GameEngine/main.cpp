@@ -1,16 +1,13 @@
 #include "engine.h"
 #include "EditorUI.h"
 #include "EngineCore.h"
-
+#include "GraphicsDevice.h"
 // 라이브러리 링크: DirectX 11 사용을 위해 필요한 라이브러리들을 링커에 전달
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 
 // [1] 전역 변수 영역
 // 프로그램 종료 시까지 유지되어야 하며, 초기화 및 렌더링 루프에서 계속 사용됨
-static ID3D11Device* g_pd3dDevice = nullptr;         // GPU 자원(메모리) 생성 담당
-static ID3D11DeviceContext* g_pd3dDeviceContext = nullptr;  // GPU 렌더링 명령 실행 담당
-static IDXGISwapChain* g_pSwapChain = nullptr;         // 그려진 그림을 화면으로 전달(교체) 담당
 static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr; // 최종적으로 그려질 '도화지' 객체
 
 //EditorUI
@@ -31,18 +28,18 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void CreateRenderTarget() {
     ID3D11Texture2D* pBackBuffer;
     // 스왑 체인의 0번 버퍼(백 버퍼)를 텍스처 객체로 가져옴
-    g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+    Graphic::GetSwapChain()->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
     // 가져온 텍스처를 이용해 렌더 타겟 뷰 생성
-    g_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &g_mainRenderTargetView);
+    Graphic::GetDevice()->CreateRenderTargetView(pBackBuffer, nullptr, &g_mainRenderTargetView);
     pBackBuffer->Release(); // 사용 완료한 인터페이스 참조 해제
 }
 
 // 헬퍼 함수: 프로그램 종료 시 할당했던 모든 GPU 자원 해제 (메모리 누수 방지)
 void CleanupDeviceD3D() {
     if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = nullptr; }
-    if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = nullptr; }
-    if (g_pd3dDeviceContext) { g_pd3dDeviceContext->Release(); g_pd3dDeviceContext = nullptr; }
-    if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
+    if (Graphic::GetSwapChain()) { Graphic::GetSwapChain()->Release(); Graphic::SetSwapChain(nullptr); }
+    if (Graphic::GetDeviceContext()) { Graphic::GetDeviceContext()->Release(); Graphic::SetDeviceContext(nullptr); }
+    if (Graphic::GetDevice()) { Graphic::GetDevice(); Graphic::SetDevice(nullptr); }
 }
 
 //argv에는 해당 엔진이 사용할 위치의 path가 사용될 거임
@@ -73,13 +70,19 @@ int main(int argc, char** argv)
     sd.Windowed = TRUE;                                 // 창 모드 시작
     sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-    UINT createDeviceFlags = 0;
+    UINT createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
     D3D_FEATURE_LEVEL featureLevel;
     const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0 };
 
     // GPU 장치(Device)와 스왑 체인(SwapChain)을 동시에 생성
-    HRESULT res = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
+    ID3D11Device* device;
+    ID3D11DeviceContext* deviceContext;
+    IDXGISwapChain* swapChain;
+    HRESULT res = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &swapChain, &device, &featureLevel, &deviceContext);
     if (res != S_OK) return 1;
+    Graphic::SetDevice(device);
+    Graphic::SetDeviceContext(deviceContext);
+    Graphic::SetSwapChain(swapChain);
 
     // 최종 도화지(Render Target) 생성 함수 호출
     CreateRenderTarget();
@@ -101,7 +104,7 @@ int main(int argc, char** argv)
 
     // Win32 및 DX11 백엔드와 ImGui 연결
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+    ImGui_ImplDX11_Init(Graphic::GetDevice(), Graphic::GetDeviceContext());
     //Editor UI 생성 단계
     editor_menuBar = new MenuBar();
     editor_hierarchy = new Hierarchy();
@@ -111,7 +114,7 @@ int main(int argc, char** argv)
     engineCore = new EngineCore();
     engineCore->editorCore = new EditorCore();
     editorCore = &engineCore->editorCore;
-    (*editorCore)->camera = new EditorCamera(*g_pd3dDevice, *g_pd3dDeviceContext, *g_pSwapChain);
+    (*editorCore)->camera = new EditorCamera();
     // --- (4) 메인 렌더링 루프 ---
     bool done = false;
     while (!done)
@@ -162,9 +165,8 @@ int main(int argc, char** argv)
         // 좌측: 계층 구조 (Hierarchy)
         editor_hierarchy->Draw();
         //뷰포트 화면 그리기
-        (*editorCore)->camera->Draw(*g_pd3dDeviceContext, *g_pSwapChain);
         // 중앙: 게임 뷰포트 (실제 게임 화면이 나올 곳)
-        editor_viewport->Draw(*(*editorCore)->camera->srv);
+        editor_viewport->Draw((*editorCore)->camera);
 
         // 우측: 속성창 (Inspector)
         editor_inspector->Draw();
@@ -178,15 +180,15 @@ int main(int argc, char** argv)
         const float clear_color_with_alpha[4] = { 0.15f, 0.15f, 0.15f, 1.00f };
 
         // GPU에게 "이제부터 이 도화지에 그려라"라고 명령
-        g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
+        Graphic::GetDeviceContext()->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
         // 도화지를 지정된 배경색으로 깨끗하게 지움
-        g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
+        Graphic::GetDeviceContext()->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
 
         // ImGui가 만든 UI 데이터를 실제로 DX11을 통해 화면에 그림
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
         // 백 버퍼와 프론트 버퍼를 교체하여 모니터에 출력 (수직동기화 적용)
-        g_pSwapChain->Present(1, 0);
+        Graphic::GetSwapChain()->Present(1, 0);
     }
 
     // --- (5) 프로그램 종료 처리 ---
