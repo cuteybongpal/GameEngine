@@ -7,6 +7,8 @@
 #include <d3d11.h>
 #include <tchar.h>
 
+#define UNITSIZE 64;
+
 typedef uint64_t uuid;
 
 typedef enum AssetType
