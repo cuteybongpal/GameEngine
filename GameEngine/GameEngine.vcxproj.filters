@@ -135,6 +135,9 @@
     <ClInclude Include="Matrix4x4.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="ComWrapper.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameObject.cpp">
@@ -219,6 +222,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Matrix4x4.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ComWrapper.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

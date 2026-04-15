@@ -1,4 +1,6 @@
 #include "GraphicsDevice.h"
+#include <windows.h>
+
 ID3D11Device* Graphic::g_pd3dDevice = nullptr;
 ID3D11DeviceContext* Graphic::g_pd3dDeviceContext = nullptr;
 IDXGISwapChain* Graphic::g_pSwapChain = nullptr;
@@ -19,17 +21,28 @@ void Graphic::SetSwapChain(IDXGISwapChain* swapChain)
 	g_pSwapChain = swapChain;
 }
 
-ID3D11Device* Graphic::GetDevice()
+GraphicDeviceHandler<ID3D11Device> Graphic::GetDevice()
 {
-	return g_pd3dDevice;
+	GraphicDeviceHandler<ID3D11Device> gdh = GraphicDeviceHandler<ID3D11Device>(&g_pd3dDevice);
+	return gdh;
 }
 
-ID3D11DeviceContext* Graphic::GetDeviceContext()
+GraphicDeviceHandler<ID3D11DeviceContext> Graphic::GetDeviceContext()
 {
-	return g_pd3dDeviceContext;
+	GraphicDeviceHandler<ID3D11DeviceContext> gdh = GraphicDeviceHandler<ID3D11DeviceContext>(&g_pd3dDeviceContext);
+	return gdh;
 }
 
-IDXGISwapChain* Graphic::GetSwapChain()
+GraphicDeviceHandler<IDXGISwapChain> Graphic::GetSwapChain()
 {
-	return g_pSwapChain;
+	GraphicDeviceHandler<IDXGISwapChain> gdh = GraphicDeviceHandler<IDXGISwapChain>(&g_pSwapChain);
+	return gdh;
+}
+
+void Graphic::CleanUp()
+{
+	STACK(1);
+	g_pd3dDevice->Release();
+	g_pd3dDeviceContext->Release();
+	g_pSwapChain->Release();
 }

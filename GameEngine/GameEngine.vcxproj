@@ -134,6 +134,7 @@
     <ClInclude Include="Action.h" />
     <ClInclude Include="Asset.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="ComWrapper.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="EditorCamera.h" />
     <ClInclude Include="EditorCore.h" />
@@ -141,7 +142,6 @@
     <ClInclude Include="engine.h" />
     <ClInclude Include="EngineCore.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GraphicsDevice.h" />
     <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="imgui\backends\imgui_impl_win32.h" />
@@ -167,6 +167,7 @@
     <ClCompile Include="Action.cpp" />
     <ClCompile Include="Asset.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="ComWrapper.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="EditorCamera.cpp" />
     <ClCompile Include="EditorCore.cpp" />

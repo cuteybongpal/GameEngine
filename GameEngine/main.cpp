@@ -34,13 +34,6 @@ void CreateRenderTarget() {
     pBackBuffer->Release(); // 사용 완료한 인터페이스 참조 해제
 }
 
-// 헬퍼 함수: 프로그램 종료 시 할당했던 모든 GPU 자원 해제 (메모리 누수 방지)
-void CleanupDeviceD3D() {
-    if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = nullptr; }
-    if (Graphic::GetSwapChain()) { Graphic::GetSwapChain()->Release(); Graphic::SetSwapChain(nullptr); }
-    if (Graphic::GetDeviceContext()) { Graphic::GetDeviceContext()->Release(); Graphic::SetDeviceContext(nullptr); }
-    if (Graphic::GetDevice()) { Graphic::GetDevice(); Graphic::SetDevice(nullptr); }
-}
 
 //argv에는 해당 엔진이 사용할 위치의 path가 사용될 거임
 int main(int argc, char** argv)
@@ -80,9 +73,7 @@ int main(int argc, char** argv)
     IDXGISwapChain* swapChain;
     HRESULT res = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &swapChain, &device, &featureLevel, &deviceContext);
     if (res != S_OK) return 1;
-    Graphic::SetDevice(device);
-    Graphic::SetDeviceContext(deviceContext);
-    Graphic::SetSwapChain(swapChain);
+    
 
     // 최종 도화지(Render Target) 생성 함수 호출
     CreateRenderTarget();
@@ -101,10 +92,10 @@ int main(int argc, char** argv)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // 창을 붙였다 뗐다 하는 도킹 기능 활성화
 
     ImGui::StyleColorsDark(); // 다크 모드 테마 적용
-
+    
     // Win32 및 DX11 백엔드와 ImGui 연결
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplDX11_Init(Graphic::GetDevice(), Graphic::GetDeviceContext());
+    ImGui_ImplDX11_Init(device, deviceContext);
     //Editor UI 생성 단계
     editor_menuBar = new MenuBar();
     editor_hierarchy = new Hierarchy();
@@ -115,6 +106,11 @@ int main(int argc, char** argv)
     engineCore->editorCore = new EditorCore();
     editorCore = &engineCore->editorCore;
     (*editorCore)->camera = new EditorCamera();
+
+    Graphic::SetDevice(device);
+    Graphic::SetDeviceContext(deviceContext);
+    Graphic::SetSwapChain(swapChain);
+
     // --- (4) 메인 렌더링 루프 ---
     bool done = false;
     while (!done)
@@ -196,7 +192,6 @@ int main(int argc, char** argv)
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    CleanupDeviceD3D(); // DX11 자원 해제
     UnregisterClass(wc.lpszClassName, wc.hInstance); // 윈도우 클래스 해제
 
     return 0;
