@@ -7,7 +7,9 @@
 #include <d3d11.h>
 #include <tchar.h>
 
-#define UNITSIZE 64;
+#define UNITSIZE 64
+//x가 false라면 강제 중단함
+#define CHECK(x) { if (!x) __debugbreak(); }
 
 typedef uint64_t uuid;
 
