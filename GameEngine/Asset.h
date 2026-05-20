@@ -6,7 +6,7 @@ class Asset
 public:
 	uuid _uuid;
 	std::string name;
-	assetType type;
+	AssetType type;
 	void* meta;
 };
 

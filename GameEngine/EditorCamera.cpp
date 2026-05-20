@@ -10,16 +10,15 @@ void EditorCamera::Draw()
 {
 	//회색 배경으로 초기화
 	float clearViewport[4] = { 0.35f, 0.35f, 0.35f, 1 };
-	ID3D11DeviceContext* context = Graphic::GetDeviceContext();
-	ID3D11Device* device = Graphic::GetDevice();
+	GraphicDeviceHandler<ID3D11DeviceContext> context = Graphic::GetDeviceContext();
+	GraphicDeviceHandler<ID3D11Device> device = Graphic::GetDevice();
 
 	context->OMSetRenderTargets(1, &this->rtv, nullptr);
 	context->ClearRenderTargetView(this->rtv, clearViewport);
 	//vs, ps 설정
-	context->VSSetShader(this->gridVertexShader, nullptr, 0);
-	context->PSSetShader(this->gridPixelShader, nullptr, 0);
+	gridVertexShader.SetShader();
+	gridPixelShader.SetShader();
 	//inputLayout 설정
-	context->IASetInputLayout(this->gridInputLayout);
 	//정점, 간선 설정
 	context->IASetVertexBuffers(0, 1, this->quadMeshBuffer.vertexBuffer.GetAddressOf(), &this->quadMeshBuffer.stride, &this->quadMeshBuffer.offset);
 	context->IASetIndexBuffer(this->quadMeshBuffer.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -42,8 +41,8 @@ void EditorCamera::Draw()
 	buff->unitsize = UNITSIZE;
 	buff->size = this->size;
 	context->Unmap(this->editorConstantBuff, 0);
-	context->VSSetConstantBuffers(0, 1, &this->editorConstantBuff);
-	context->PSSetConstantBuffers(0, 1, &this->editorConstantBuff);
+	gridVertexShader.SetConstantBuff(editorConstantBuff);
+	gridPixelShader.SetConstantBuff(editorConstantBuff);
 	//viewport 설정
 	context->RSSetViewports(1, &this->viewport);
 	context->DrawIndexed(this->quadMeshBuffer.indexCount, 0, 0);
@@ -52,6 +51,7 @@ void EditorCamera::Draw()
 
 EditorCamera::EditorCamera()
 {
+	GraphicDeviceHandler<ID3D11Device> deviceHandler = Graphic::GetDevice();
 	//에디터 뷰포트 텍스쳐의 기본적인 정보 초기화
 	this->pos = { 0, 0, 0 };
 	this->size = { 1920, 1080 };
@@ -82,25 +82,22 @@ EditorCamera::EditorCamera()
 	desc.CPUAccessFlags = 0;
 	//특수 옵션
 	desc.MiscFlags = 0;
-	ID3D11Device* device = Graphic::GetDevice();
-	ID3D11DeviceContext* context = Graphic::GetDeviceContext();
-	IDXGISwapChain* swapchain = Graphic::GetSwapChain();
 
-	HRESULT hr = device->CreateTexture2D(&desc, nullptr, &this->texture);
+	HRESULT hr = deviceHandler->CreateTexture2D(&desc, nullptr, &this->texture);
 	if (FAILED(hr) || !this->texture)
 	{
 		std::cout << "Editor Camera texture generate failed!!" << std::endl;
 		return;
 	}
 
-	hr = device->CreateRenderTargetView(this->texture, nullptr, &this->rtv);
+	hr = deviceHandler->CreateRenderTargetView(this->texture, nullptr, &this->rtv);
 	if (FAILED(hr) || !this->rtv)
 	{
 		std::cout << "Editor Camera RTV generate failed!!" << std::endl;
 		return;
 	}
 
-	hr = device->CreateShaderResourceView(this->texture, nullptr, &this->srv);
+	hr = deviceHandler->CreateShaderResourceView(this->texture, nullptr, &this->srv);
 	if (FAILED(hr) || !this->srv) 
 	{
 		std::cout << "Editor Camera SRV generate failed!!" << std::endl;
@@ -121,14 +118,6 @@ EditorCamera::EditorCamera()
 	};
 	MeshBuffer mBuffer = meshToMeshBuffer(mesh);
 	this->quadMeshBuffer = mBuffer;
-	//shader 생성하기
-	ID3DBlob* vertexShaderBlob = nullptr;
-	D3DReadFileToBlob(L"./GridVertexShader.cso", &vertexShaderBlob);
-	Graphic::GetDevice()->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &this->gridVertexShader);
-
-	ID3DBlob* pixelShaderBlob = nullptr;
-	D3DReadFileToBlob(L"./GridPixelShader.cso", &pixelShaderBlob);
-	Graphic::GetDevice()->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &this->gridPixelShader);
 
 	//vertexshader에 들어갈 매개변수에 대한 설명
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -152,15 +141,18 @@ EditorCamera::EditorCamera()
 			0
 		}
 	};
+	//shader 생성하기
+	gridVertexShader = Shader(ShaderType::VertexShader, L"GridVertexShader.cso", layout, ARRAYSIZE(layout));
+	gridPixelShader = Shader(ShaderType::PixelShader, L"GridPixelShader.cso");
+	
 	//상수 버퍼 만들기
-	Graphic::GetDevice()->CreateInputLayout(layout, ARRAYSIZE(layout), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &this->gridInputLayout);
 	
 	D3D11_BUFFER_DESC cb_desc{};
 	cb_desc.ByteWidth = sizeof(EditorConstantBuff);
 	cb_desc.Usage = D3D11_USAGE_DYNAMIC;
 	cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	Graphic::GetDevice()->CreateBuffer(&cb_desc, nullptr, &this->editorConstantBuff);
+	deviceHandler->CreateBuffer(&cb_desc, nullptr, &this->editorConstantBuff);
 
 	this->viewport.TopLeftX = 0;
 	this->viewport.TopLeftY = 0;

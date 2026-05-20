@@ -73,7 +73,10 @@ int main(int argc, char** argv)
     IDXGISwapChain* swapChain;
     HRESULT res = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &swapChain, &device, &featureLevel, &deviceContext);
     if (res != S_OK) return 1;
-    
+
+    Graphic::SetDevice(device);
+    Graphic::SetDeviceContext(deviceContext);
+    Graphic::SetSwapChain(swapChain);
 
     // 최종 도화지(Render Target) 생성 함수 호출
     CreateRenderTarget();
@@ -107,9 +110,7 @@ int main(int argc, char** argv)
     editorCore = &engineCore->editorCore;
     (*editorCore)->camera = new EditorCamera();
 
-    Graphic::SetDevice(device);
-    Graphic::SetDeviceContext(deviceContext);
-    Graphic::SetSwapChain(swapChain);
+    
 
     // --- (4) 메인 렌더링 루프 ---
     bool done = false;

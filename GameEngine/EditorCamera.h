@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Matrix4x4.h"
 
+
 class EditorCamera
 {
 public:
@@ -20,11 +21,10 @@ public:
 	void Draw();
 	EditorCamera();
 	//그리드 그리기용 vs, ps
-	ID3D11VertexShader* gridVertexShader;
-	ID3D11PixelShader* gridPixelShader;
+	Shader gridVertexShader;
+	Shader gridPixelShader;
 
-	//inputLayout vs에 들어갈
-	ID3D11InputLayout* gridInputLayout;
+	//vs, ps에 들어갈 상수 버퍼
 	ID3D11Buffer* editorConstantBuff;
 	//viewport
 	D3D11_VIEWPORT viewport;

@@ -8,19 +8,18 @@ class GraphicDeviceHandler
 public:
 	T* operator->() const
 	{
-		//현재 COM객체가 유효한지 검사
-		HRESULT hr = this->obj->QueryInterface(__uuidof(IUnknown), (void**)&temp);
 		//COM 객체가 유효하지 않다면 __debugbreak()호출함
-		CHECK(!FAILED(hr));
+		CHECK((obj != nullptr));
+		CHECK((*obj != nullptr));
 		return *obj;
 	}
-	GraphicDeviceHandler(T** obj)
+	GraphicDeviceHandler(T** d)
 	{
-		this->obj = obj;
+		obj = d;
 	}
 private:
 	//COM객체를 직접 소유 하지 않음
-	T** obj;
+	T** obj = nullptr;
 };
 
 class Graphic

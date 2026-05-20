@@ -40,6 +40,9 @@
     <Filter Include="헤더 파일\Component">
       <UniqueIdentifier>{534c1ed0-cb1b-41e5-98d4-17debe730cba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Debug">
+      <UniqueIdentifier>{e7b781ac-38ab-49d2-85c6-81a811710a8a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameObject.h">
@@ -126,9 +129,6 @@
     <ClInclude Include="Vector2.h">
       <Filter>헤더 파일\Type</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsDevice.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Transform.h">
       <Filter>헤더 파일\Component</Filter>
     </ClInclude>
@@ -136,6 +136,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ComWrapper.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -224,8 +227,11 @@
     <ClCompile Include="Matrix4x4.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ComWrapper.cpp">
+    <ClCompile Include="Shader.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>소스 파일\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
